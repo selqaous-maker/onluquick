@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">OnlyQuick route mark</title>
+  <desc id="desc">A circular route loop with a forward exit stroke and waypoint.</desc>
+  <circle cx="29" cy="31" r="19" fill="none" stroke="#C7F36B" stroke-width="3"/>
+  <path d="M17 43 45 15" fill="none" stroke="#C7F36B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M42 15h10v10" fill="none" stroke="#C7F36B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="42" cy="19" r="3.5" fill="#85D7E7"/>
+</svg>
