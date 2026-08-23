@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   CircleArrowOutUpRight,
+  Copy,
   Globe2,
   Layers3,
   Mail,
@@ -16,9 +17,13 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const EMAIL_CTA = "mailto:owner@onlyquick.com?subject=OnlyQuick.com%20acquisition";
+const EMAIL_ADDRESS = "owner@onlyquick.com";
+const EMAIL_SUBJECT = "OnlyQuick.com acquisition";
+const EMAIL_CTA = `mailto:${EMAIL_ADDRESS}?subject=${encodeURIComponent(EMAIL_SUBJECT)}`;
+const GMAIL_CTA = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_ADDRESS)}&su=${encodeURIComponent(EMAIL_SUBJECT)}`;
+const OUTLOOK_CTA = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(EMAIL_ADDRESS)}&subject=${encodeURIComponent(EMAIL_SUBJECT)}`;
 const SECURE_CTA = "https://unstoppabledomains.com/d/onlyquick.com";
 
 const categories = ["Quick Commerce", "Express Delivery", "Logistics", "On-Demand Services"];
@@ -60,13 +65,13 @@ function Logo({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function CTAButtons({ compact = false }: { compact?: boolean }) {
+function CTAButtons({ compact = false, onInquiry }: { compact?: boolean; onInquiry: () => void }) {
   return (
     <div className={`cta-row ${compact ? "cta-row--compact" : ""}`}>
-      <a className="button button--primary" href={EMAIL_CTA}>
+      <button className="button button--primary" type="button" onClick={onInquiry} aria-haspopup="dialog">
         {compact ? "Request details" : "Request acquisition details"}
         <ArrowUpRight size={16} strokeWidth={2.2} />
-      </a>
+      </button>
       <a className="button button--secondary" href={SECURE_CTA} target="_blank" rel="noreferrer">
         <span>{compact ? "Secure purchase" : "View secure purchase option"}</span>
         <CircleArrowOutUpRight size={16} strokeWidth={2.2} />
@@ -78,6 +83,44 @@ function CTAButtons({ compact = false }: { compact?: boolean }) {
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!contactOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setContactOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [contactOpen]);
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(EMAIL_ADDRESS);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = EMAIL_ADDRESS;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2200);
+  };
+
+  const openContact = () => {
+    setCopied(false);
+    setContactOpen(true);
+  };
 
   return (
     <div className="site-shell" id="top">
@@ -90,7 +133,7 @@ export default function Home() {
             <a href="#acquisition" onClick={() => setMenuOpen(false)}>Acquisition</a>
             <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
           </nav>
-          <a className="header-cta" href={EMAIL_CTA}>Request details <ArrowUpRight size={15} /></a>
+          <button className="header-cta" type="button" onClick={openContact} aria-haspopup="dialog">Request details <ArrowUpRight size={15} /></button>
           <button className="menu-toggle" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
@@ -104,7 +147,7 @@ export default function Home() {
             <h1 id="hero-title">A premium <em>.COM</em> domain for businesses built around speed.</h1>
             <p className="hero-lede">OnlyQuick.com is a short, memorable and globally usable domain for quick commerce, express delivery, logistics and on-demand services.</p>
             <div className="hero-price"><span>One-time acquisition price</span><strong>$4,888</strong></div>
-            <CTAButtons />
+            <CTAButtons onInquiry={openContact} />
             <div className="trust-line"><Check size={14} /> Direct owner sale. Secure transfer available.</div>
           </div>
           <div className="hero-art reveal reveal--late" aria-label="Abstract route map visual">
@@ -154,12 +197,12 @@ export default function Home() {
 
         <section className="acquisition-band" id="acquisition" aria-labelledby="acquisition-title">
           <div className="acquisition-text"><div className="section-number">05 <span>/</span> ACQUISITION</div><h2 id="acquisition-title">Acquire a name built for the next generation of <span>fast commerce.</span></h2><p>Clear terms, direct contact, and a focused purchase path.</p></div>
-          <div className="acquisition-card"><div className="acquisition-card-top"><span>DOMAIN ASSET</span><Route size={19} /></div><div className="acquisition-domain">ONLYQUICK<span>.COM</span></div><div className="acquisition-price"><span>One-time acquisition price</span><strong>$4,888</strong></div><div className="trust-points"><span><Check size={14} /> Direct sale from the current owner</span><span><Check size={14} /> Secure checkout and transfer available through Unstoppable Domains</span><span><Check size={14} /> Clear domain-only acquisition with no hidden claims</span></div><CTAButtons /></div>
+          <div className="acquisition-card"><div className="acquisition-card-top"><span>DOMAIN ASSET</span><Route size={19} /></div><div className="acquisition-domain">ONLYQUICK<span>.COM</span></div><div className="acquisition-price"><span>One-time acquisition price</span><strong>$4,888</strong></div><div className="trust-points"><span><Check size={14} /> Direct sale from the current owner</span><span><Check size={14} /> Secure checkout and transfer available through Unstoppable Domains</span><span><Check size={14} /> Clear domain-only acquisition with no hidden claims</span></div><CTAButtons onInquiry={openContact} /></div>
         </section>
 
         <section className="section section--trust" aria-labelledby="trust-title">
           <div className="section-intro"><div className="section-number">06 <span>/</span> TRANSPARENCY &amp; TRUST</div><h2 id="trust-title">Clear terms. <span>Simple transfer.</span></h2><p>A straightforward domain-name acquisition, without the noise.</p></div>
-          <div className="terms-grid"><div className="terms-list"><div><dt>What is included?</dt><dd>The OnlyQuick.com domain name and its transfer to the buyer.</dd></div><div><dt>Is this a full company acquisition?</dt><dd>No. This is a domain-name acquisition only.</dd></div><div><dt>Does the sale include a trademark, business, traffic or revenue?</dt><dd>No. The sale includes the domain name only.</dd></div><div><dt>How is the transfer completed?</dt><dd>The buyer can complete the transaction through a secure domain marketplace or an agreed escrow and transfer process.</dd></div></div><a className="contact-card" href={EMAIL_CTA}><Mail size={20} /><span>Questions about the asset?</span><strong>owner@onlyquick.com</strong><ArrowUpRight size={17} /></a></div>
+          <div className="terms-grid"><div className="terms-list"><div><dt>What is included?</dt><dd>The OnlyQuick.com domain name and its transfer to the buyer.</dd></div><div><dt>Is this a full company acquisition?</dt><dd>No. This is a domain-name acquisition only.</dd></div><div><dt>Does the sale include a trademark, business, traffic or revenue?</dt><dd>No. The sale includes the domain name only.</dd></div><div><dt>How is the transfer completed?</dt><dd>The buyer can complete the transaction through a secure domain marketplace or an agreed escrow and transfer process.</dd></div></div><button className="contact-card" type="button" onClick={openContact} aria-haspopup="dialog"><Mail size={20} /><span>Questions about the asset?</span><strong>owner@onlyquick.com</strong><ArrowUpRight size={17} /></button></div>
         </section>
 
         <section className="section section--faq" id="faq" aria-labelledby="faq-title">
@@ -167,10 +210,46 @@ export default function Home() {
           <div className="faq-list">{faqs.map(([question, answer], index) => <div className={`faq-item ${openFaq === index ? "faq-item--open" : ""}`} key={question}><button onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-expanded={openFaq === index}><span>{question}</span><ChevronDown size={19} /></button><div className="faq-answer"><p>{answer}</p></div></div>)}</div>
         </section>
 
-        <section className="final-cta" aria-labelledby="final-title"><div className="final-route" aria-hidden="true"><span /><span /><span /></div><div className="final-cta-content"><div className="section-number">08 <span>/</span> NEXT MOVE</div><h2 id="final-title">Own the name behind a <span>faster customer experience.</span></h2><p>OnlyQuick.com is available for acquisition by a company building around speed, convenience and instant access.</p><CTAButtons /></div></section>
+        <section className="final-cta" aria-labelledby="final-title"><div className="final-route" aria-hidden="true"><span /><span /><span /></div><div className="final-cta-content"><div className="section-number">08 <span>/</span> NEXT MOVE</div><h2 id="final-title">Own the name behind a <span>faster customer experience.</span></h2><p>OnlyQuick.com is available for acquisition by a company building around speed, convenience and instant access.</p><CTAButtons onInquiry={openContact} /></div></section>
       </main>
 
-      <footer className="site-footer"><Logo /><div className="footer-meta"><span>Direct owner sale</span><a href={EMAIL_CTA}>owner@onlyquick.com</a></div><a className="back-top" href="#top">Back to top <ArrowUpRight size={15} /></a></footer>
+      <footer className="site-footer"><Logo /><div className="footer-meta"><span>Direct owner sale</span><button type="button" onClick={openContact}>owner@onlyquick.com</button></div><a className="back-top" href="#top">Back to top <ArrowUpRight size={15} /></a></footer>
+
+      {contactOpen && (
+        <div className="contact-modal-backdrop" role="presentation" onMouseDown={() => setContactOpen(false)}>
+          <section className="contact-modal" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="contact-modal-close" type="button" onClick={() => setContactOpen(false)} aria-label="Close contact options">
+              <X size={20} />
+            </button>
+            <div className="section-number">DIRECT OWNER CONTACT <span>/</span> ONLYQUICK.COM</div>
+            <h2 id="contact-modal-title">Request acquisition details.</h2>
+            <p>Choose your preferred email service, or copy the owner’s address and continue from any inbox.</p>
+            <div className="contact-options">
+              <a href={GMAIL_CTA} target="_blank" rel="noreferrer">
+                <Mail size={19} />
+                <span><strong>Open Gmail</strong><small>Start a pre-addressed message</small></span>
+                <ArrowUpRight size={17} />
+              </a>
+              <a href={OUTLOOK_CTA} target="_blank" rel="noreferrer">
+                <Mail size={19} />
+                <span><strong>Open Outlook</strong><small>Compose in Microsoft Outlook</small></span>
+                <ArrowUpRight size={17} />
+              </a>
+              <a href={EMAIL_CTA}>
+                <Mail size={19} />
+                <span><strong>Default email app</strong><small>Use your device’s configured app</small></span>
+                <ArrowUpRight size={17} />
+              </a>
+              <button type="button" onClick={copyEmail}>
+                <Copy size={19} />
+                <span><strong>{copied ? "Email copied" : "Copy email address"}</strong><small>{EMAIL_ADDRESS}</small></span>
+                <Check size={17} className={copied ? "copy-confirmed" : ""} />
+              </button>
+            </div>
+            <div className="contact-modal-note">Direct owner sale. Serious acquisition inquiries are welcome.</div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
