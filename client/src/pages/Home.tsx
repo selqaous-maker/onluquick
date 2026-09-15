@@ -3,7 +3,6 @@ import {
   Check,
   CircleArrowOutUpRight,
   Globe2,
-  Layers3,
   Mail,
   Menu,
   MoveRight,
@@ -17,7 +16,7 @@ import { useState } from "react";
 
 const EMAIL_ADDRESS = "owner@onlyquick.com";
 const EMAIL_SUBJECT = "OnlyQuick.com acquisition";
-const EMAIL_CTA = `mailto:${EMAIL_ADDRESS}?subject=${encodeURIComponent(EMAIL_SUBJECT)}`;
+const CONTACT_CTA = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_ADDRESS)}&su=${encodeURIComponent(EMAIL_SUBJECT)}`;
 const SECURE_CTA = "https://unstoppabledomains.com/d/onlyquick.com";
 
 const whyCards = [
@@ -94,13 +93,21 @@ function Logo() {
   );
 }
 
+function ContactLink({ className, children }: { className?: string; children: React.ReactNode }) {
+  return (
+    <a className={className} href={CONTACT_CTA} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  );
+}
+
 function CTAButtons({ compact = false }: { compact?: boolean }) {
   return (
     <div className={`cta-row ${compact ? "cta-row--compact" : ""}`}>
-      <a className="button button--primary" href={EMAIL_CTA}>
+      <ContactLink className="button button--primary">
         {compact ? "Contact owner" : "Discuss acquisition"}
         <ArrowUpRight size={16} strokeWidth={2.2} />
-      </a>
+      </ContactLink>
       <a
         className="button button--secondary"
         href={SECURE_CTA}
@@ -136,9 +143,9 @@ export default function Home() {
               Acquisition
             </a>
           </nav>
-          <a className="header-cta" href={EMAIL_CTA}>
+          <ContactLink className="header-cta">
             Contact owner <ArrowUpRight size={15} />
-          </a>
+          </ContactLink>
           <button
             className="menu-toggle"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -312,12 +319,12 @@ export default function Home() {
               <span><Check size={14} /> Secure checkout available through Unstoppable Domains</span>
             </div>
             <CTAButtons />
-            <a className="contact-card" href={EMAIL_CTA}>
+            <ContactLink className="contact-card">
               <Mail size={20} />
               <span>Questions before purchasing?</span>
               <strong>{EMAIL_ADDRESS}</strong>
               <ArrowUpRight size={17} />
-            </a>
+            </ContactLink>
           </div>
         </section>
       </main>
@@ -326,7 +333,7 @@ export default function Home() {
         <Logo />
         <div className="footer-meta">
           <span>Direct owner sale</span>
-          <a href={EMAIL_CTA}>{EMAIL_ADDRESS}</a>
+          <ContactLink>{EMAIL_ADDRESS}</ContactLink>
         </div>
         <a className="back-top" href="#top">
           Back to top <ArrowUpRight size={15} />
